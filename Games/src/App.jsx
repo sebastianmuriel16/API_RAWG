@@ -1,20 +1,22 @@
-import { CardGames } from './components/Games/Games.jsx'
-import { useGames } from './Hooks/useGames.js'
-import { Search } from './components/Search/Search.jsx'
-import { FiltersMenu } from './components/Menu/Menu.jsx'
-import { ModalDetail } from './components/ModalDetail/ModalDetail.jsx'
+import { CardGames } from "./components/Games/Games.jsx";
+import { useGames } from "./Hooks/useGames.js";
+import { Search } from "./components/Search/Search.jsx";
+import { FiltersMenu } from "./components/Menu/Menu.jsx";
+import { CloseProvider } from "./Context/close.jsx";
 
-import './App.css'
+import "./App.css";
 function App() {
-  const { games } = useGames()
+  const { games } = useGames();
+
   return (
-    <main>  
+    <main>
       <FiltersMenu />
       <Search />
-      <CardGames games={games} />
-      <ModalDetail game={true}/>
+      <CloseProvider>
+        <CardGames games={games} />
+      </CloseProvider>
     </main>
-  )
+  );
 }
 
-export default App
+export default App;

@@ -1,77 +1,72 @@
-import './carrusel.css'
-import { useEffect, useRef, useState } from 'react'
-import { IconArrowLeftSLine } from '../../components/Icons/Icons'
-import { IconArrowRightSLine } from '../../components/Icons/Icons'
+import { useScreenshots } from "../../Hooks/useScreenshots";
+import { useContext, useEffect, useState } from "react";
+import { CloseContext } from "../../Context/close";
+import { IconArrowLeftSLine } from "../../components/Icons/Icons";
+import { IconArrowRightSLine } from "../../components/Icons/Icons";
+import { IconCloseCircle } from "../../components/Icons/Icons";
+import "./carrusel.css";
 
-const images = [
-  {
-    id: 1827221,
-    image:
-      'https://media.rawg.io/media/screenshots/a7c/a7c43871a54bed6573a6a429451564ef.jpg',
-  },
-  {
-    id: 1827222,
-    image:
-      'https://media.rawg.io/media/screenshots/cf4/cf4367daf6a1e33684bf19adb02d16d6.jpg',
-  },
-  {
-    id: 1827223,
-    image:
-      'https://media.rawg.io/media/screenshots/f95/f9518b1d99210c0cae21fc09e95b4e31.jpg',
-  },
-  {
-    id: 1827225,
-    image:
-      'https://media.rawg.io/media/screenshots/a5c/a5c95ea539c87d5f538763e16e18fb99.jpg',
-  },
-]
+function Carrusel({ id }) {
+  const { close, setClose } = useContext(CloseContext);
+  const { getResults, images } = useScreenshots();
+  const [loading, setLoading] = useState(true);
+  const [slide, setSlide] = useState(0);
 
-function Carrusel() {
-  const listRed = useRef()
-  const [currentIndex, setCurrentIndex] = useState(0)
+  useEffect(() => {
+    getResults(id);
+  }, [id]);
 
-    useEffect(() => {
-        const listNode = listRed.current
-        const imgNode = listNode.querySelectorAll("li > img")[currentIndex]
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false); // Después del tiempo determinado, cambia loading a false
+    }, 500); // Cambia 3000 a la cantidad de milisegundos que deseas que dure el esqueleto de carga
 
-        if (imgNode) {
-            imgNode.scrollIntoView({
-                behavior: "smooth",
-            })
-        }
-    }, [currentIndex])
+    return () => clearTimeout(timer); // Limpia el temporizador para evitar fugas de memoria
+  }, []);
 
-    const scrollToImage = (direction) => {
-        if (direction === "prev") {
-            setCurrentIndex(curr =>{
-                const isFirstSlide = curr === 0
-                return isFirstSlide ? 0: curr - 1
-            })
-        }else {
-            setCurrentIndex(curr =>{
-                const isLastSlide = curr === images.length - 1
-                return isLastSlide ? curr : curr + 1
-            })
-        }
-    }
+  const handleClose = () => {
+    setClose(true);
+  };
+
+  const nextSlide = () => {
+    setSlide((prevSlide) => {
+      return prevSlide === images?.length - 1 ? 0 : prevSlide + 1;
+    });
+  };
+
+  const prevSlide = () => {
+    setSlide((prevSlide) => {
+      return prevSlide === 0 ? images?.length - 1 : prevSlide - 1;
+    });
+  };
 
   return (
-    <div className="carrusel-container">
-      <div className="slider-carrusel">
-        <span className='left-arrow' onClick={() => scrollToImage('prev')}> <IconArrowLeftSLine /> </span>
-        <span className='right-arrow' onClick={() => scrollToImage('next')}> <IconArrowRightSLine /></span>
-        <div className="container-images">
-          <ul ref={listRed}>
-            {images.map((image) => (
-              <li key={image.id}>
-                <img src={image.image} alt="" />
-              </li>
-            ))}
-          </ul>
-        </div>
+    <main className={close ? "carousel-close" : "main-carousel"}>
+      <div className="carousel">
+        <IconCloseCircle className="close" onClick={handleClose} />
+        <IconArrowLeftSLine className="arrow arrow-left" onClick={prevSlide} />
+
+        {loading ? (
+          <div className="skeleton"></div>
+        ) : (
+          images.map((item, index) => {
+            return (
+              <img
+                className={slide === index ? "slide" : "slide-hidden"}
+                key={item.id}
+                src={item.image}
+                alt={item.id}
+              />
+            );
+          })
+        )}
+        <IconArrowRightSLine
+          className="arrow arrow-right"
+          onClick={nextSlide}
+        />
       </div>
-    </div>
-  )
+    </main>
+  );
 }
 
-export { Carrusel }
+export { Carrusel };
